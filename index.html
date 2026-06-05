@@ -413,7 +413,8 @@
   function updateButtons(){
     const anyReq=!!(undoReq||drawReq);
     $("undo").disabled=!bothJoined||gameHist.length===0||anyReq;
-    $("draw").disabled=!bothJoined||state.over||anyReq;
+    $("draw").disabled=!bothJoined||anyReq;
+    $("draw").textContent=state.over?"New game":"Propose draw";
   }
 
   function updateSeriesUI(series){
@@ -487,7 +488,8 @@
   }
 
   function proposeDraw(){
-    if(!bothJoined||state.over||undoReq||drawReq) return;
+    if(!bothJoined||undoReq||drawReq) return;
+    if(state.over){ approveDraw(); return; }
     db.ref("rooms/"+roomCode+"/drawReq").set({by:myMark,ts:Date.now()});
   }
 
