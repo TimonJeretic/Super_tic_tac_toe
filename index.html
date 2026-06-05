@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">insert
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,37 +9,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0c241a;
-    --bg2:#102e21;
-    --felt:#1c4a38;
-    --felt-hi:#236047;
-    --wood:#6e4a2a;
-    --wood-hi:#9a6c40;
-    --wood-lo:#3c2613;
-    --wood-edge:#2a1a0d;
-    --x:#f3e7cf;
-    --x-glow:rgba(243,231,207,.45);
-    --o:#e07a52;
-    --o-glow:rgba(224,122,82,.45);
-    --gold:#e6b94f;
-    --ink:#e9e0cf;
-    --muted:#9fb3a6;
-    --line:rgba(243,231,207,.55);
+    --bg:#0c241a;--bg2:#102e21;--felt:#1c4a38;--felt-hi:#236047;
+    --wood:#6e4a2a;--wood-hi:#9a6c40;--wood-lo:#3c2613;--wood-edge:#2a1a0d;
+    --x:#f3e7cf;--x-glow:rgba(243,231,207,.45);
+    --o:#e07a52;--o-glow:rgba(224,122,82,.45);
+    --gold:#e6b94f;--ink:#e9e0cf;--muted:#9fb3a6;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
+  /* safety: always honour hidden attribute */
+  [hidden]{display:none!important}
   body{
-    font-family:"Manrope",system-ui,sans-serif;
-    color:var(--ink);
-    min-height:100%;
-    display:flex;align-items:center;justify-content:center;
-    padding:18px 14px 26px;
-    background:
-      radial-gradient(120% 90% at 50% -10%, var(--bg2), var(--bg) 60%),
-      var(--bg);
+    font-family:"Manrope",system-ui,sans-serif;color:var(--ink);min-height:100%;
+    display:flex;align-items:center;justify-content:center;padding:18px 14px 26px;
+    background:radial-gradient(120% 90% at 50% -10%,var(--bg2),var(--bg) 60%),var(--bg);
     position:relative;overflow-x:hidden;
   }
-  /* subtle felt grain */
   body::before{
     content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
@@ -47,23 +32,15 @@
   .wrap{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:18px;z-index:1}
 
   header{text-align:center;width:100%}
-  h1{
-    font-family:"Fraunces",Georgia,serif;
-    font-weight:600;font-size:clamp(26px,7vw,40px);
-    letter-spacing:.5px;line-height:1;
-    color:#f6efe1;
-    text-shadow:0 2px 0 rgba(0,0,0,.35);
-  }
+  h1{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:clamp(26px,7vw,40px);
+    letter-spacing:.5px;line-height:1;color:#f6efe1;text-shadow:0 2px 0 rgba(0,0,0,.35)}
   h1 .super{display:block;font-size:.42em;letter-spacing:.42em;text-transform:uppercase;
     color:var(--gold);margin-bottom:.35em;text-shadow:none;font-weight:600}
 
-  /* status + scores */
-  .hud{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:14px}
-  .chip{
-    display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;
-    background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.06);
-    font-weight:700;font-size:15px;transition:.25s;
-  }
+  /* HUD row: chips on left, series badge pushed right */
+  .hud{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:14px;width:100%}
+  .chip{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;
+    background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.06);font-weight:700;font-size:15px;transition:.25s}
   .chip .glyph{width:18px;height:18px;display:block}
   .chip.x.on{box-shadow:0 0 0 1.5px var(--x-glow),0 0 18px var(--x-glow);background:rgba(243,231,207,.10)}
   .chip.o.on{box-shadow:0 0 0 1.5px var(--o-glow),0 0 18px var(--o-glow);background:rgba(224,122,82,.12)}
@@ -71,79 +48,68 @@
   .chip.x.on .count{color:var(--x)}
   .chip.o.on .count{color:var(--o)}
 
-  .status{
-    min-height:30px;margin-top:4px;font-family:"Fraunces",Georgia,serif;
-    font-size:clamp(16px,4.4vw,21px);font-weight:600;letter-spacing:.3px;
-    display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;
+  /* series score badge */
+  .series-badge{
+    margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:7px 13px;border-radius:12px;background:rgba(0,0,0,.22);
+    border:1px solid rgba(255,255,255,.06);font-size:11px;font-weight:700;
+    letter-spacing:.05em;min-width:54px;
   }
+  .series-badge .s-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:1px}
+  .series-badge .s-row{display:flex;align-items:center;gap:6px;font-size:13px;font-variant-numeric:tabular-nums}
+  .series-badge .s-x{color:var(--x)}
+  .series-badge .s-o{color:var(--o)}
+  .series-badge .s-sep{color:var(--muted);font-size:11px}
+
+  .status{min-height:30px;margin-top:4px;font-family:"Fraunces",Georgia,serif;
+    font-size:clamp(16px,4.4vw,21px);font-weight:600;letter-spacing:.3px;
+    display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}
   .status .hint{font-family:"Manrope",sans-serif;font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.3px}
   .status.win{font-size:clamp(20px,5.5vw,26px)}
   .status .name.x{color:var(--x)}
   .status .name.o{color:var(--o)}
 
   /* room bar */
-  .roombar{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
-    margin-top:12px;font-size:13px;font-weight:700;color:var(--muted)}
+  .roombar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+    margin-top:10px;font-size:13px;font-weight:700;color:var(--muted)}
   .roombar b{color:var(--ink);letter-spacing:.12em}
   .roombar b.name.x{color:var(--x)}
   .roombar b.name.o{color:var(--o)}
+  .roombar .leave-btn{padding:6px 13px;font-size:12px;border-radius:9px;
+    background:linear-gradient(180deg,#6b3030,#4a2020 55%,#311515);
+    box-shadow:0 2px 0 #1c0c0c,inset 0 1px 1px rgba(255,255,255,.18)}
+  .roombar .leave-btn:hover{filter:brightness(1.12)}
 
   /* board */
-  .mega{
-    width:min(92vw,520px);padding:16px;border-radius:18px;position:relative;
-    background:
-      repeating-linear-gradient(96deg, rgba(0,0,0,.10) 0 2px, transparent 2px 7px),
-      linear-gradient(150deg, var(--wood-hi), var(--wood) 40%, var(--wood-lo));
-    box-shadow:
-      0 0 0 2px var(--wood-edge),
-      inset 0 2px 4px rgba(255,255,255,.18),
-      inset 0 -6px 12px rgba(0,0,0,.5),
-      0 26px 50px -16px rgba(0,0,0,.7);
-  }
-  .mega-inner{
-    position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
-    gap:10px;aspect-ratio:1;
-  }
-  .board{
-    position:relative;display:flex;border-radius:9px;min-height:0;min-width:0;
-    background:
-      repeating-linear-gradient(8deg, rgba(0,0,0,.08) 0 2px, transparent 2px 6px),
-      linear-gradient(150deg, var(--wood-hi), var(--wood-lo));
-    padding:5px;
-    box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45);
-    transition:filter .3s, box-shadow .3s;
-  }
-  .cells{
-    position:relative;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
-    gap:4px;min-height:0;min-width:0;
-  }
-  .cell{
-    border-radius:5px;min-height:0;min-width:0;cursor:default;
-    background:radial-gradient(120% 120% at 30% 25%, var(--felt-hi), var(--felt));
+  .mega{width:min(92vw,520px);padding:16px;border-radius:18px;position:relative;
+    background:repeating-linear-gradient(96deg,rgba(0,0,0,.10) 0 2px,transparent 2px 7px),
+      linear-gradient(150deg,var(--wood-hi),var(--wood) 40%,var(--wood-lo));
+    box-shadow:0 0 0 2px var(--wood-edge),inset 0 2px 4px rgba(255,255,255,.18),
+      inset 0 -6px 12px rgba(0,0,0,.5),0 26px 50px -16px rgba(0,0,0,.7)}
+  .mega-inner{position:relative;display:grid;grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);gap:10px;aspect-ratio:1}
+  .board{position:relative;display:flex;border-radius:9px;min-height:0;min-width:0;
+    background:repeating-linear-gradient(8deg,rgba(0,0,0,.08) 0 2px,transparent 2px 6px),
+      linear-gradient(150deg,var(--wood-hi),var(--wood-lo));
+    padding:5px;box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45);
+    transition:filter .3s,box-shadow .3s}
+  .cells{position:relative;flex:1;display:grid;grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);gap:4px;min-height:0;min-width:0}
+  .cell{border-radius:5px;min-height:0;min-width:0;cursor:default;
+    background:radial-gradient(120% 120% at 30% 25%,var(--felt-hi),var(--felt));
     box-shadow:inset 0 2px 3px rgba(0,0,0,.4),inset 0 -1px 1px rgba(255,255,255,.05);
-    display:flex;align-items:center;justify-content:center;transition:background .2s;
-  }
-  /* active board: brighter felt so it clearly stands out */
-  .board.allowed .cell:empty{
-    background:radial-gradient(120% 120% at 30% 25%, #2c7857, #1f5d46);
-  }
+    display:flex;align-items:center;justify-content:center;transition:background .2s}
+  .board.allowed .cell:empty{background:radial-gradient(120% 120% at 30% 25%,#2c7857,#1f5d46)}
   body.your-turn .board.allowed .cell:empty{cursor:pointer}
-  body.your-turn .board.allowed .cell:empty:hover{
-    background:radial-gradient(120% 120% at 30% 25%, #34875f, #276a4f);
-  }
-
-  /* allowed highlight — bright, breathing ring so it's easy to see */
+  body.your-turn .board.allowed .cell:empty:hover{background:radial-gradient(120% 120% at 30% 25%,#34875f,#276a4f)}
   .board.allowed{animation:breathe 1.9s ease-in-out infinite}
   @keyframes breathe{
-    0%,100%{box-shadow:
-      inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
+    0%,100%{box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
       0 0 0 2px rgba(243,231,207,.6),0 0 18px rgba(243,231,207,.35)}
-    50%{box-shadow:
-      inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
+    50%{box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
       0 0 0 3px rgba(246,239,225,.95),0 0 32px rgba(243,231,207,.65)}
   }
 
-  /* marks */
   .mark{width:78%;height:78%;display:block;transform-origin:center}
   .mark line,.mark circle{fill:none;stroke-width:13;stroke-linecap:round}
   .mark.x line{stroke:var(--x);filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
@@ -151,9 +117,8 @@
   .mark.pop{animation:pop .24s cubic-bezier(.2,1.3,.5,1)}
   @keyframes pop{0%{transform:scale(.25);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
 
-  /* won-board overlay */
-  .overlay{position:absolute;inset:5px;border-radius:6px;display:flex;align-items:center;justify-content:center;
-    pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(6,16,11,.5)}
+  .overlay{position:absolute;inset:5px;border-radius:6px;display:flex;align-items:center;
+    justify-content:center;pointer-events:none;opacity:0;transition:opacity .25s;background:rgba(6,16,11,.5)}
   .board.won .overlay{opacity:1}
   .board.won{filter:saturate(.7)}
   .big{width:74%;height:74%;display:block;transform-origin:center}
@@ -162,122 +127,120 @@
   .big.o circle{stroke:var(--o);filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
   .board.won .big{animation:stamp .3s cubic-bezier(.2,1.4,.4,1)}
   @keyframes stamp{0%{transform:scale(1.7) rotate(-6deg);opacity:0}60%{transform:scale(.93) rotate(1deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
-
-  /* draw-clear flash */
   .board.flash{animation:flash .5s ease-out}
   @keyframes flash{0%{filter:brightness(2.1) saturate(1.4)}100%{filter:brightness(1)}}
-
-  /* winning board highlight at game end */
   .board.winhi{filter:none}
   .board.winhi .overlay{background:rgba(230,185,79,.16)}
-  .board.winhi{box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),0 0 0 2px var(--gold),0 0 22px rgba(230,185,79,.55)!important;animation:none}
+  .board.winhi{box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
+    0 0 0 2px var(--gold),0 0 22px rgba(230,185,79,.55)!important;animation:none}
 
-  /* winning line */
   .winline{position:absolute;inset:16px;pointer-events:none;overflow:visible}
   .winline line{stroke:var(--gold);stroke-width:.12;stroke-linecap:round;fill:none;
     filter:drop-shadow(0 0 .06px var(--gold)) drop-shadow(0 0 6px rgba(230,185,79,.7));
     stroke-dasharray:5;stroke-dashoffset:5;transition:stroke-dashoffset .55s ease-out .15s}
   .winline.show line{stroke-dashoffset:0}
 
-  /* undo request bar */
-  .undobar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  /* request bar — used for both undo and draw proposals */
+  .reqbar{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
     padding:11px 18px;border-radius:12px;background:rgba(0,0,0,.32);
     border:1px solid rgba(230,185,79,.45);font-size:14px;font-weight:600;color:var(--ink)}
-  .undobar b.name.x{color:var(--x)}
-  .undobar b.name.o{color:var(--o)}
+  .reqbar b.name.x{color:var(--x)}
+  .reqbar b.name.o{color:var(--o)}
 
-  /* controls */
   .controls{display:flex;gap:12px}
-  button{
-    font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;letter-spacing:.3px;
+  button{font-family:"Manrope",sans-serif;font-weight:700;font-size:14px;letter-spacing:.3px;
     color:#f2e7d2;cursor:pointer;padding:11px 22px;border-radius:11px;border:none;
     background:linear-gradient(180deg,var(--wood-hi),var(--wood) 55%,var(--wood-lo));
     box-shadow:0 2px 0 var(--wood-edge),inset 0 1px 1px rgba(255,255,255,.25),0 6px 14px -6px rgba(0,0,0,.6);
-    transition:transform .08s, filter .15s, opacity .2s;
-  }
+    transition:transform .08s,filter .15s,opacity .2s}
   button:hover{filter:brightness(1.08)}
   button:active{transform:translateY(2px);box-shadow:0 0 0 var(--wood-edge),inset 0 1px 1px rgba(255,255,255,.2)}
   button:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}
   button.mini{padding:8px 16px;font-size:13px}
-  button.mini.ok{background:linear-gradient(180deg,#3f9266,#2a6f4a 55%,#1d5236);box-shadow:0 2px 0 #143a26,inset 0 1px 1px rgba(255,255,255,.25)}
+  button.mini.ok{background:linear-gradient(180deg,#3f9266,#2a6f4a 55%,#1d5236);
+    box-shadow:0 2px 0 #143a26,inset 0 1px 1px rgba(255,255,255,.25)}
 
   /* lobby */
   .screen{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
-  .panel{
-    width:min(92vw,360px);padding:26px 24px;border-radius:18px;text-align:center;margin-top:18px;
+  .panel{width:min(92vw,360px);padding:26px 24px;border-radius:18px;text-align:center;margin-top:18px;
     background:linear-gradient(150deg,var(--wood-hi),var(--wood) 40%,var(--wood-lo));
-    box-shadow:0 0 0 2px var(--wood-edge),inset 0 2px 4px rgba(255,255,255,.18),inset 0 -6px 12px rgba(0,0,0,.5),0 26px 50px -16px rgba(0,0,0,.7);
-  }
+    box-shadow:0 0 0 2px var(--wood-edge),inset 0 2px 4px rgba(255,255,255,.18),
+      inset 0 -6px 12px rgba(0,0,0,.5),0 26px 50px -16px rgba(0,0,0,.7)}
   .panel h2{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:23px;color:#f6efe1;margin-bottom:18px}
   .panel button{width:100%}
   .panel .or{margin:14px 0;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
-  .panel input{
-    width:100%;text-align:center;font-family:"Manrope",sans-serif;font-weight:700;font-size:20px;
+  .panel input{width:100%;text-align:center;font-family:"Manrope",sans-serif;font-weight:700;font-size:20px;
     letter-spacing:.3em;text-transform:uppercase;color:#f6efe1;padding:12px;border-radius:11px;
-    border:none;margin-bottom:12px;background:rgba(0,0,0,.3);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);outline:none;
-  }
+    border:none;margin-bottom:12px;background:rgba(0,0,0,.3);box-shadow:inset 0 2px 4px rgba(0,0,0,.5);outline:none}
   .panel input::placeholder{color:var(--muted);letter-spacing:.3em}
   .panel .msg{margin-top:16px;min-height:20px;font-size:13px;font-weight:600;color:var(--gold);line-height:1.4}
 </style>
 </head>
 <body>
 
-  <!-- ===================== LOBBY ===================== -->
-  <div class="screen" id="lobby">
-    <header>
-      <h1><span class="super">Super</span>Tic-Tac-Toe</h1>
-    </header>
-    <div class="panel">
-      <h2>Play online</h2>
-      <button id="createBtn">Create room</button>
-      <div class="or">or</div>
-      <input id="joinCode" placeholder="CODE" maxlength="5" autocomplete="off" spellcheck="false" autocapitalize="characters">
-      <button id="joinBtn">Join room</button>
-      <div class="msg" id="lobbyMsg"></div>
-    </div>
+<!-- ===================== LOBBY ===================== -->
+<div class="screen" id="lobby">
+  <header><h1><span class="super">Super</span>Tic-Tac-Toe</h1></header>
+  <div class="panel">
+    <h2>Play online</h2>
+    <button id="createBtn">Create room</button>
+    <div class="or">or</div>
+    <input id="joinCode" placeholder="CODE" maxlength="5" autocomplete="off" spellcheck="false" autocapitalize="characters">
+    <button id="joinBtn">Join room</button>
+    <div class="msg" id="lobbyMsg"></div>
   </div>
+</div>
 
-  <!-- ===================== GAME ===================== -->
-  <div class="wrap" id="game" hidden>
-    <header>
-      <h1><span class="super">Super</span>Tic-Tac-Toe</h1>
-      <div class="hud">
-        <div class="chip x" id="chipX">
-          <svg class="glyph" viewBox="0 0 100 100"><line x1="22" y1="22" x2="78" y2="78" stroke="var(--x)" stroke-width="14" stroke-linecap="round"/><line x1="78" y1="22" x2="22" y2="78" stroke="var(--x)" stroke-width="14" stroke-linecap="round"/></svg>
-          <span>X</span><span class="count" id="scoreX">0</span>
-        </div>
-        <div class="chip o" id="chipO">
-          <svg class="glyph" viewBox="0 0 100 100"><circle cx="50" cy="50" r="29" fill="none" stroke="var(--o)" stroke-width="14"/></svg>
-          <span>O</span><span class="count" id="scoreO">0</span>
+<!-- ===================== GAME ===================== -->
+<div class="wrap" id="game" hidden>
+  <header>
+    <h1><span class="super">Super</span>Tic-Tac-Toe</h1>
+    <div class="hud">
+      <div class="chip x" id="chipX">
+        <svg class="glyph" viewBox="0 0 100 100"><line x1="22" y1="22" x2="78" y2="78" stroke="var(--x)" stroke-width="14" stroke-linecap="round"/><line x1="78" y1="22" x2="22" y2="78" stroke="var(--x)" stroke-width="14" stroke-linecap="round"/></svg>
+        <span>X</span><span class="count" id="scoreX">0</span>
+      </div>
+      <div class="chip o" id="chipO">
+        <svg class="glyph" viewBox="0 0 100 100"><circle cx="50" cy="50" r="29" fill="none" stroke="var(--o)" stroke-width="14"/></svg>
+        <span>O</span><span class="count" id="scoreO">0</span>
+      </div>
+      <div class="series-badge" id="seriesBadge">
+        <span class="s-label">Series</span>
+        <div class="s-row">
+          <span class="s-x" id="seriesX">0</span>
+          <span class="s-sep">–</span>
+          <span class="s-o" id="seriesO">0</span>
         </div>
       </div>
-      <div class="status" id="status"></div>
-      <div class="roombar" id="roombar" hidden>
-        <span>Room <b id="rbCode">----</b></span>
-        <span>You: <b id="rbMark" class="name">?</b></span>
-        <button class="rb-copy mini" id="copyLink">Copy link</button>
-      </div>
-    </header>
-
-    <div class="mega">
-      <div class="mega-inner" id="board"></div>
-      <svg class="winline" id="winline" viewBox="0 0 3 3" preserveAspectRatio="none">
-        <line id="winLineEl" x1="0" y1="0" x2="0" y2="0"></line>
-      </svg>
     </div>
-
-    <div class="undobar" id="undoBar" hidden>
-      <span id="undoText"></span>
-      <span class="ub-actions" id="undoActions"></span>
+    <div class="status" id="status"></div>
+    <div class="roombar" id="roombar" hidden>
+      <span>Room <b id="rbCode">----</b></span>
+      <span>You: <b id="rbMark" class="name">?</b></span>
+      <button class="mini" id="copyLink">Copy link</button>
+      <button class="mini leave-btn" id="leaveBtn">Leave room</button>
     </div>
+  </header>
 
-    <div class="controls">
-      <button id="undo">Undo</button>
-      <button id="restart">Restart</button>
-    </div>
+  <div class="mega">
+    <div class="mega-inner" id="board"></div>
+    <svg class="winline" id="winline" viewBox="0 0 3 3" preserveAspectRatio="none">
+      <line id="winLineEl" x1="0" y1="0" x2="0" y2="0"></line>
+    </svg>
   </div>
 
-<!-- Firebase SDK (compat build — no bundler needed) -->
+  <div class="reqbar" id="reqBar" hidden>
+    <span id="reqText"></span>
+    <span id="reqActions"></span>
+  </div>
+
+  <div class="controls">
+    <button id="undo">Undo</button>
+    <button id="draw">Propose draw</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -286,464 +249,340 @@
   "use strict";
 
   /* =================================================================
-     ▼▼▼  PASTE YOUR FIREBASE CONFIG HERE  ▼▼▼
-     Firebase console → Project settings → "Your apps" → Web app → Config.
-     The databaseURL line is the important one for Realtime Database.
+     PASTE YOUR FIREBASE CONFIG HERE
   ================================================================= */
   const firebaseConfig = {
-
-    apiKey: "AIzaSyC4zXXPzY1VBvIet-zfHM_hp3MfotKDDJk",
-
-    authDomain: "super-krizec-krozec.firebaseapp.com",
-
-    databaseURL: "https://super-krizec-krozec-default-rtdb.europe-west1.firebasedatabase.app",
-
-    projectId: "super-krizec-krozec",
-
-    storageBucket: "super-krizec-krozec.firebasestorage.app",
-
-    messagingSenderId: "273734503683",
-
-    appId: "1:273734503683:web:4e51aff4d1c4908098ad36"
-
+    apiKey: "PASTE_HERE",
+    authDomain: "PASTE_HERE",
+    databaseURL: "PASTE_HERE",
+    projectId: "PASTE_HERE",
+    storageBucket: "PASTE_HERE",
+    messagingSenderId: "PASTE_HERE",
+    appId: "PASTE_HERE"
   };
-
   /* ================================================================= */
 
   const CONFIG_OK = !!firebaseConfig.apiKey && String(firebaseConfig.apiKey).indexOf("PASTE") < 0;
   let db = null;
-  if(CONFIG_OK){
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-  }
+  if(CONFIG_OK){ firebase.initializeApp(firebaseConfig); db = firebase.database(); }
 
   const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   const $ = id => document.getElementById(id);
 
-  // ---- local mirror of the room ----
   let state, gameHist = [], boardEls, cellEls, overlayEls;
-  let myMark = null;            // "X" | "O"
-  let roomCode = null;
-  let roomRef = null;
-  let bothJoined = false;
-  let undoReq = null;
-  let lastSeq = -1;
+  let myMark = null, roomCode = null, roomRef = null;
+  let bothJoined = false, undoReq = null, drawReq = null, lastSeq = -1;
   const clientId = getClientId();
 
   function getClientId(){
     let id = null;
     try { id = localStorage.getItem("sttt-client"); } catch(e){}
-    if(!id){
-      id = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      try { localStorage.setItem("sttt-client", id); } catch(e){}
-    }
+    if(!id){ id = Math.random().toString(36).slice(2)+Date.now().toString(36); try{ localStorage.setItem("sttt-client",id); }catch(e){} }
     return id;
   }
 
-  // ============================ GAME STATE ============================
+  // ========================= GAME LOGIC =========================
   function initState(){
-    return {
-      boards: Array.from({length:9}, () => Array(9).fill(null)),
-      winners: Array(9).fill(null),
-      current: "X",
-      active: null,            // null = play anywhere
-      over: false,
-      winner: null,
-      winType: null,           // "line" | "majority"
-      winBoards: [],
-      seq: 0,                  // increments each move (for flash sync)
-      cleared: -1              // last mini-board cleared by a draw
-    };
+    return { boards:Array.from({length:9},()=>Array(9).fill(null)), winners:Array(9).fill(null),
+      current:"X", active:null, over:false, winner:null, winType:null, winBoards:[], seq:0, cleared:-1 };
   }
 
   function clone(s){
-    return {
-      boards: s.boards.map(b => b.slice()),
-      winners: s.winners.slice(),
-      current: s.current,
-      active: s.active,
-      over: s.over,
-      winner: s.winner,
-      winType: s.winType,
-      winBoards: s.winBoards.slice(),
-      seq: s.seq,
-      cleared: s.cleared
-    };
+    return { boards:s.boards.map(b=>b.slice()), winners:s.winners.slice(),
+      current:s.current, active:s.active, over:s.over, winner:s.winner,
+      winType:s.winType, winBoards:s.winBoards.slice(), seq:s.seq, cleared:s.cleared };
   }
 
-  function markSVG(p, cls){
-    if(p === "X"){
-      return '<svg class="'+cls+' x" viewBox="0 0 100 100"><line x1="22" y1="22" x2="78" y2="78"/><line x1="78" y1="22" x2="22" y2="78"/></svg>';
-    }
+  function markSVG(p,cls){
+    if(p==="X") return '<svg class="'+cls+' x" viewBox="0 0 100 100"><line x1="22" y1="22" x2="78" y2="78"/><line x1="78" y1="22" x2="22" y2="78"/></svg>';
     return '<svg class="'+cls+' o" viewBox="0 0 100 100"><circle cx="50" cy="50" r="28"/></svg>';
   }
 
   function winnerOf(cells){
-    for(const [a,b,c] of LINES){
-      if(cells[a] && cells[a] === cells[b] && cells[b] === cells[c]) return {p:cells[a], line:[a,b,c]};
-    }
+    for(const [a,b,c] of LINES){ if(cells[a]&&cells[a]===cells[b]&&cells[b]===cells[c]) return {p:cells[a]}; }
     return null;
   }
 
-  function isAllowed(s, b){
-    if(s.over) return false;
-    if(s.winners[b] !== null) return false;          // closed board
-    if(s.active === null) return true;               // play anywhere
-    return s.active === b;
+  function isAllowed(s,b){ if(s.over||s.winners[b]!==null) return false; return s.active===null||s.active===b; }
+
+  function applyMove(s,hist,b,c){
+    const ns=clone(s), nh=hist.slice(); nh.push(clone(s));
+    const player=ns.current; ns.boards[b][c]=player; ns.cleared=-1;
+    const w=winnerOf(ns.boards[b]);
+    if(w){ ns.winners[b]=player; }
+    else if(ns.boards[b].every(x=>x!==null)){ ns.boards[b]=Array(9).fill(null); ns.cleared=b; }
+    ns.active = ns.winners[c]!==null ? null : c;
+    const my=[]; for(let i=0;i<9;i++) if(ns.winners[i]===player) my.push(i);
+    let won=null;
+    for(const [x,y,z] of LINES){ if(ns.winners[x]===player&&ns.winners[y]===player&&ns.winners[z]===player){won={type:"line",boards:[x,y,z]};break;} }
+    if(!won&&my.length>=5) won={type:"majority",boards:my};
+    if(won){ ns.over=true;ns.winner=player;ns.winType=won.type;ns.winBoards=won.boards; }
+    else { ns.current=player==="X"?"O":"X"; }
+    ns.seq=(s.seq||0)+1;
+    return {state:ns,history:nh};
   }
 
-  // Pure: compute the next state + history for a move. No side effects.
-  function applyMove(s, hist, b, c){
-    const ns = clone(s);
-    const nh = hist.slice();
-    nh.push(clone(s));
-
-    const player = ns.current;
-    ns.boards[b][c] = player;
-    ns.cleared = -1;
-
-    const w = winnerOf(ns.boards[b]);
-    if(w){
-      ns.winners[b] = player;
-    } else if(ns.boards[b].every(x => x !== null)){
-      ns.boards[b] = Array(9).fill(null);            // draw -> clear so it can be replayed
-      ns.cleared = b;
-    }
-
-    if(ns.winners[c] !== null){ ns.active = null; }   // sent to a finished board -> anywhere
-    else { ns.active = c; }
-
-    const myBoards = [];
-    for(let i=0;i<9;i++) if(ns.winners[i] === player) myBoards.push(i);
-
-    let won = null;
-    for(const [x,y,z] of LINES){
-      if(ns.winners[x] === player && ns.winners[y] === player && ns.winners[z] === player){
-        won = {type:"line", boards:[x,y,z]}; break;
-      }
-    }
-    if(!won && myBoards.length >= 5) won = {type:"majority", boards: myBoards};
-
-    if(won){
-      ns.over = true; ns.winner = player; ns.winType = won.type; ns.winBoards = won.boards;
-    } else {
-      ns.current = player === "X" ? "O" : "X";
-    }
-
-    ns.seq = (s.seq || 0) + 1;
-    return { state: ns, history: nh };
-  }
-
-  // ============================ DOM BUILD ============================
+  // ========================= DOM BUILD =========================
   function build(){
-    const board = $("board");
-    board.innerHTML = "";
-    boardEls = []; cellEls = []; overlayEls = [];
-    for(let b=0; b<9; b++){
-      const bEl = document.createElement("div");
-      bEl.className = "board";
-      bEl.dataset.b = b;
-      const cells = document.createElement("div");
-      cells.className = "cells";
-      const cArr = [];
-      for(let c=0; c<9; c++){
-        const cEl = document.createElement("div");
-        cEl.className = "cell";
-        cEl.dataset.b = b; cEl.dataset.c = c; cEl.dataset.mark = "";
-        cells.appendChild(cEl);
-        cArr.push(cEl);
+    const board=$("board"); board.innerHTML="";
+    boardEls=[];cellEls=[];overlayEls=[];
+    for(let b=0;b<9;b++){
+      const bEl=document.createElement("div"); bEl.className="board"; bEl.dataset.b=b;
+      const cells=document.createElement("div"); cells.className="cells";
+      const cArr=[];
+      for(let c=0;c<9;c++){
+        const cEl=document.createElement("div"); cEl.className="cell";
+        cEl.dataset.b=b;cEl.dataset.c=c;cEl.dataset.mark="";
+        cells.appendChild(cEl);cArr.push(cEl);
       }
-      const ov = document.createElement("div");
-      ov.className = "overlay";
-      bEl.appendChild(cells);
-      bEl.appendChild(ov);
-      board.appendChild(bEl);
-      boardEls.push(bEl); cellEls.push(cArr); overlayEls.push(ov);
+      const ov=document.createElement("div"); ov.className="overlay";
+      bEl.appendChild(cells);bEl.appendChild(ov);board.appendChild(bEl);
+      boardEls.push(bEl);cellEls.push(cArr);overlayEls.push(ov);
     }
-    board.addEventListener("click", onClick);
+    board.addEventListener("click",onClick);
   }
 
   function onClick(e){
-    const cell = e.target.closest(".cell");
-    if(!cell) return;
-    if(!CONFIG_OK || !bothJoined || state.over) return;
-    if(myMark !== state.current) return;             // not your turn
-    const b = +cell.dataset.b, c = +cell.dataset.c;
-    if(!isAllowed(state, b)) return;
-    if(state.boards[b][c] !== null) return;
-    const res = applyMove(state, gameHist, b, c);
-    pushGame(res.state, res.history, true);           // write -> listener renders for both
+    const cell=e.target.closest(".cell"); if(!cell) return;
+    if(!CONFIG_OK||!bothJoined||state.over) return;
+    if(myMark!==state.current) return;
+    const b=+cell.dataset.b,c=+cell.dataset.c;
+    if(!isAllowed(state,b)||state.boards[b][c]!==null) return;
+    const res=applyMove(state,gameHist,b,c);
+    pushGame(res.state,res.history,true,true);   // clearUndo + clearDraw
   }
 
-  function flash(b){
-    const el = boardEls[b];
-    el.classList.remove("flash");
-    void el.offsetWidth;
-    el.classList.add("flash");
-  }
+  function flash(b){ const el=boardEls[b]; el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
 
-  // ============================ RENDER ============================
+  // ========================= RENDER =========================
   function render(){
-    const winSet = state.over ? new Set(state.winBoards) : new Set();
-
+    const winSet=state.over?new Set(state.winBoards):new Set();
     for(let b=0;b<9;b++){
-      const bEl = boardEls[b];
-      const wn = state.winners[b];
-
-      bEl.classList.toggle("won", wn !== null);
-      bEl.classList.toggle("allowed", bothJoined && isAllowed(state, b));
-      bEl.classList.toggle("winhi", state.over && winSet.has(b));
-
-      const ov = overlayEls[b];
-      const want = wn ? wn : "";
-      if(ov.dataset.mark !== want){
-        ov.dataset.mark = want;
-        ov.innerHTML = wn ? markSVG(wn, "big") : "";
-      }
-
+      const bEl=boardEls[b],wn=state.winners[b];
+      bEl.classList.toggle("won",wn!==null);
+      bEl.classList.toggle("allowed",bothJoined&&isAllowed(state,b));
+      bEl.classList.toggle("winhi",state.over&&winSet.has(b));
+      const ov=overlayEls[b],want=wn?wn:"";
+      if(ov.dataset.mark!==want){ ov.dataset.mark=want; ov.innerHTML=wn?markSVG(wn,"big"):""; }
       for(let c=0;c<9;c++){
-        const cEl = cellEls[b][c];
-        const m = state.boards[b][c] || "";
-        if(cEl.dataset.mark !== m){
-          cEl.dataset.mark = m;
-          cEl.innerHTML = m ? markSVG(m, "mark pop") : "";
-        }
+        const cEl=cellEls[b][c],m=state.boards[b][c]||"";
+        if(cEl.dataset.mark!==m){ cEl.dataset.mark=m; cEl.innerHTML=m?markSVG(m,"mark pop"):""; }
       }
     }
-
-    const sx = state.winners.filter(w => w === "X").length;
-    const so = state.winners.filter(w => w === "O").length;
-    $("scoreX").textContent = sx;
-    $("scoreO").textContent = so;
-
-    const chipX = $("chipX"), chipO = $("chipO"), status = $("status");
-    chipX.classList.toggle("on", bothJoined && !state.over && state.current === "X");
-    chipO.classList.toggle("on", bothJoined && !state.over && state.current === "O");
-
+    const sx=state.winners.filter(w=>w==="X").length, so=state.winners.filter(w=>w==="O").length;
+    $("scoreX").textContent=sx; $("scoreO").textContent=so;
+    const chipX=$("chipX"),chipO=$("chipO"),status=$("status");
+    chipX.classList.toggle("on",bothJoined&&!state.over&&state.current==="X");
+    chipO.classList.toggle("on",bothJoined&&!state.over&&state.current==="O");
     if(!bothJoined){
       status.classList.remove("win");
-      status.innerHTML = '<span class="hint">Waiting for opponent\u2026</span>';
+      status.innerHTML='<span class="hint">Waiting for opponent\u2026</span>';
     } else if(state.over){
       status.classList.add("win");
-      const cls = state.winner === "X" ? "x" : "o";
-      const youWon = state.winner === myMark;
-      status.innerHTML = 'Player <span class="name '+cls+'">'+state.winner+'</span> wins'
-        + ' <span class="hint">\u00b7 '+(youWon ? "you win" : "you lose")+'</span>';
+      const cls=state.winner==="X"?"x":"o";
+      status.innerHTML='Player <span class="name '+cls+'">'+state.winner+'</span> wins'
+        +'<span class="hint">\u00b7 '+(state.winner===myMark?"you win":"you lose")+'</span>';
     } else {
       status.classList.remove("win");
-      const cls = state.current === "X" ? "x" : "o";
-      const mine = state.current === myMark;
-      let html = '<span class="name '+cls+'">'+state.current+'</span>\u2009to move';
-      html += '<span class="hint">\u00b7 '+(mine ? "your turn" : "opponent")+'</span>';
-      if(state.active === null) html += '<span class="hint">\u00b7 play anywhere</span>';
-      status.innerHTML = html;
+      const cls=state.current==="X"?"x":"o", mine=state.current===myMark;
+      let html='<span class="name '+cls+'">'+state.current+'</span>\u2009to move'
+        +'<span class="hint">\u00b7 '+(mine?"your turn":"opponent")+'</span>';
+      if(state.active===null) html+='<span class="hint">\u00b7 play anywhere</span>';
+      status.innerHTML=html;
     }
-
     drawWinLine();
   }
 
   function drawWinLine(){
-    const wl = $("winline"), el = $("winLineEl");
-    if(state.over && state.winType === "line"){
-      const a = state.winBoards[0], c = state.winBoards[2];
-      const cx = i => (i % 3) + 0.5;
-      const cy = i => Math.floor(i / 3) + 0.5;
-      el.setAttribute("x1", cx(a)); el.setAttribute("y1", cy(a));
-      el.setAttribute("x2", cx(c)); el.setAttribute("y2", cy(c));
-      void wl.getBoundingClientRect();
-      wl.classList.add("show");
+    const wl=$("winline"),el=$("winLineEl");
+    if(state.over&&state.winType==="line"){
+      const a=state.winBoards[0],c=state.winBoards[2];
+      const cx=i=>(i%3)+.5,cy=i=>Math.floor(i/3)+.5;
+      el.setAttribute("x1",cx(a));el.setAttribute("y1",cy(a));
+      el.setAttribute("x2",cx(c));el.setAttribute("y2",cy(c));
+      void wl.getBoundingClientRect(); wl.classList.add("show");
     } else {
       wl.classList.remove("show");
-      el.setAttribute("x2", el.getAttribute("x1") || 0);
-      el.setAttribute("y2", el.getAttribute("y1") || 0);
+      el.setAttribute("x2",el.getAttribute("x1")||0);
+      el.setAttribute("y2",el.getAttribute("y1")||0);
     }
   }
 
-  function updateTurnUI(){
-    const myTurn = bothJoined && !state.over && state.current === myMark;
-    document.body.classList.toggle("your-turn", myTurn);
-  }
+  function updateTurnUI(){ document.body.classList.toggle("your-turn",bothJoined&&!state.over&&state.current===myMark); }
 
   function updateButtons(){
-    $("undo").disabled = !bothJoined || gameHist.length === 0 || !!undoReq;
-    $("restart").disabled = !bothJoined;
+    const anyReq=!!(undoReq||drawReq);
+    $("undo").disabled=!bothJoined||gameHist.length===0||anyReq;
+    $("draw").disabled=!bothJoined||state.over||anyReq;
   }
 
-  // ============================ FIREBASE SYNC ============================
-  function pushGame(st, hist, clearUndo){
-    const updates = {};
-    updates["rooms/"+roomCode+"/game"] = JSON.stringify({ state: st, history: hist });
-    if(clearUndo) updates["rooms/"+roomCode+"/undoReq"] = null;
-    db.ref().update(updates).catch(err => console.error("write failed", err));
+  function updateSeriesUI(series){
+    $("seriesX").textContent=(series&&series.X)||0;
+    $("seriesO").textContent=(series&&series.O)||0;
+  }
+
+  // ========================= FIREBASE =========================
+  function pushGame(st,hist,clearUndo,clearDraw){
+    const updates={};
+    updates["rooms/"+roomCode+"/game"]=JSON.stringify({state:st,history:hist});
+    if(clearUndo) updates["rooms/"+roomCode+"/undoReq"]=null;
+    if(clearDraw) updates["rooms/"+roomCode+"/drawReq"]=null;
+    // only the player who made the winning move increments the series
+    if(st.over&&st.winner) updates["rooms/"+roomCode+"/series/"+st.winner]=firebase.database.ServerValue.increment(1);
+    db.ref().update(updates).catch(err=>console.error("write failed",err));
   }
 
   function listenRoom(){
-    roomRef = db.ref("rooms/"+roomCode);
-    roomRef.on("value", snap => {
-      const data = snap.val();
-      if(!data) return;
-
-      const players = data.players || {};
-      bothJoined = !!(players.X && players.O);
-
+    roomRef=db.ref("rooms/"+roomCode);
+    roomRef.on("value",snap=>{
+      const data=snap.val(); if(!data) return;
+      const players=data.players||{};
+      bothJoined=!!(players.X&&players.O);
       if(data.game){
-        try {
-          const g = JSON.parse(data.game);
-          state = g.state;
-          gameHist = g.history || [];
-        } catch(e){ console.error("parse error", e); }
+        try{ const g=JSON.parse(data.game); state=g.state; gameHist=g.history||[]; }
+        catch(e){ console.error("parse error",e); }
       }
-
-      // flash a freshly cleared board, but only on a new (forward) move
-      if(state && state.seq > lastSeq){
-        if(state.cleared >= 0) flash(state.cleared);
-      }
-      if(state) lastSeq = state.seq;
-
-      handleUndoReq(data.undoReq || null);
-      render();
-      updateTurnUI();
-      updateButtons();
+      if(state&&state.seq>lastSeq&&state.cleared>=0) flash(state.cleared);
+      if(state) lastSeq=state.seq;
+      updateSeriesUI(data.series||null);
+      handleReqs(data.undoReq||null,data.drawReq||null);
+      render(); updateTurnUI(); updateButtons();
     });
   }
 
-  function handleUndoReq(req){
-    undoReq = req;
-    const bar = $("undoBar"), text = $("undoText"), actions = $("undoActions");
-    if(!req || !bothJoined){
-      bar.hidden = true; actions.innerHTML = "";
-      return;
-    }
-    bar.hidden = false;
-    if(req.by === myMark){
-      text.textContent = "Undo requested \u2014 waiting for opponent\u2026";
-      actions.innerHTML = '<button class="mini" id="undoCancel">Cancel</button>';
-      $("undoCancel").onclick = () => db.ref("rooms/"+roomCode+"/undoReq").remove();
+  function handleReqs(uReq,dReq){
+    undoReq=uReq; drawReq=dReq;
+    const bar=$("reqBar"),text=$("reqText"),actions=$("reqActions");
+    // undo takes priority; only one can be active at a time
+    const req=uReq||dReq;
+    if(!req||!bothJoined){ bar.hidden=true; actions.innerHTML=""; return; }
+    bar.hidden=false;
+    const isUndo=!!uReq;
+    const who=req.by, whoClass=who==="X"?"x":"o";
+    if(req.by===myMark){
+      text.textContent=(isUndo?"Undo":"Draw")+" proposed \u2014 waiting for opponent\u2026";
+      actions.innerHTML='<button class="mini" id="reqCancel">Cancel</button>';
+      $("reqCancel").onclick=()=>db.ref("rooms/"+roomCode+(isUndo?"/undoReq":"/drawReq")).remove();
     } else {
-      const who = req.by;
-      text.innerHTML = 'Player <b class="name '+(who==="X"?"x":"o")+'">'+who+'</b> wants to undo';
-      actions.innerHTML = '<button class="mini ok" id="undoOk">Allow</button>'
-                        + '<button class="mini" id="undoNo">Deny</button>';
-      $("undoOk").onclick = approveUndo;
-      $("undoNo").onclick = () => db.ref("rooms/"+roomCode+"/undoReq").remove();
+      text.innerHTML='Player <b class="name '+whoClass+'">'+who+'</b> '+(isUndo?"wants to undo":"proposes a draw");
+      actions.innerHTML='<button class="mini ok" id="reqOk">'+(isUndo?"Allow":"Accept")+'</button>'
+                       +'<button class="mini" id="reqNo">'+(isUndo?"Deny":"Decline")+'</button>';
+      $("reqOk").onclick=isUndo?approveUndo:approveDraw;
+      $("reqNo").onclick=()=>db.ref("rooms/"+roomCode+(isUndo?"/undoReq":"/drawReq")).remove();
     }
   }
 
   function requestUndo(){
-    if(!bothJoined || gameHist.length === 0 || undoReq) return;
-    db.ref("rooms/"+roomCode+"/undoReq").set({ by: myMark, ts: Date.now() });
+    if(!bothJoined||gameHist.length===0||undoReq||drawReq) return;
+    db.ref("rooms/"+roomCode+"/undoReq").set({by:myMark,ts:Date.now()});
   }
 
   function approveUndo(){
-    if(gameHist.length === 0){
-      db.ref("rooms/"+roomCode+"/undoReq").remove();
-      return;
-    }
-    const prev = gameHist[gameHist.length - 1];
-    const newHist = gameHist.slice(0, -1);
-    const updates = {};
-    updates["rooms/"+roomCode+"/game"] = JSON.stringify({ state: prev, history: newHist });
-    updates["rooms/"+roomCode+"/undoReq"] = null;
+    if(gameHist.length===0){ db.ref("rooms/"+roomCode+"/undoReq").remove(); return; }
+    const prev=gameHist[gameHist.length-1],newHist=gameHist.slice(0,-1);
+    const updates={};
+    updates["rooms/"+roomCode+"/game"]=JSON.stringify({state:prev,history:newHist});
+    updates["rooms/"+roomCode+"/undoReq"]=null;
     db.ref().update(updates);
   }
 
-  function restart(){
-    if(!bothJoined) return;
-    const init = initState();
-    const updates = {};
-    updates["rooms/"+roomCode+"/game"] = JSON.stringify({ state: init, history: [] });
-    updates["rooms/"+roomCode+"/undoReq"] = null;
+  function proposeDraw(){
+    if(!bothJoined||state.over||undoReq||drawReq) return;
+    db.ref("rooms/"+roomCode+"/drawReq").set({by:myMark,ts:Date.now()});
+  }
+
+  function approveDraw(){
+    const init=initState();
+    const updates={};
+    updates["rooms/"+roomCode+"/game"]=JSON.stringify({state:init,history:[]});
+    updates["rooms/"+roomCode+"/drawReq"]=null;
     $("winline").classList.remove("show");
-    lastSeq = -1;
+    lastSeq=-1;
     db.ref().update(updates);
   }
 
-  // ============================ ROOMS ============================
+  // ========================= ROOMS =========================
   function genCode(){
-    const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
-    let s = "";
-    for(let i=0;i<4;i++) s += chars[Math.floor(Math.random()*chars.length)];
-    return s;
+    const chars="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    let s=""; for(let i=0;i<4;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s;
   }
 
-  function lobbyMsg(t){ $("lobbyMsg").textContent = t || ""; }
+  function lobbyMsg(t){ $("lobbyMsg").textContent=t||""; }
 
   function createRoom(){
     if(!CONFIG_OK) return;
-    roomCode = genCode();
-    myMark = "X";
-    const init = initState();
-    const updates = {};
-    updates["rooms/"+roomCode+"/players/X"] = clientId;
-    updates["rooms/"+roomCode+"/game"] = JSON.stringify({ state: init, history: [] });
-    updates["rooms/"+roomCode+"/createdAt"] = Date.now();
-    db.ref().update(updates).then(enterRoom).catch(err => lobbyMsg("Error: " + err.message));
+    roomCode=genCode(); myMark="X";
+    const init=initState(), updates={};
+    updates["rooms/"+roomCode+"/players/X"]=clientId;
+    updates["rooms/"+roomCode+"/game"]=JSON.stringify({state:init,history:[]});
+    updates["rooms/"+roomCode+"/createdAt"]=Date.now();
+    db.ref().update(updates).then(enterRoom).catch(err=>lobbyMsg("Error: "+err.message));
   }
 
   function joinRoom(code){
     if(!CONFIG_OK) return;
-    code = (code || "").trim().toUpperCase();
-    if(code.length < 4){ lobbyMsg("Enter a valid room code."); return; }
-    const ref = db.ref("rooms/"+code);
-    ref.once("value").then(snap => {
-      if(!snap.exists()){ lobbyMsg("Room \"" + code + "\" not found."); return; }
-      const players = (snap.val().players) || {};
-      if(players.X === clientId){ myMark = "X"; }
-      else if(players.O === clientId){ myMark = "O"; }
-      else if(!players.X){ myMark = "X"; ref.child("players/X").set(clientId); }
-      else if(!players.O){ myMark = "O"; ref.child("players/O").set(clientId); }
+    code=(code||"").trim().toUpperCase();
+    if(code.length<4){ lobbyMsg("Enter a valid room code."); return; }
+    const ref=db.ref("rooms/"+code);
+    ref.once("value").then(snap=>{
+      if(!snap.exists()){ lobbyMsg('Room "'+code+'" not found.'); return; }
+      const players=(snap.val().players)||{};
+      if(players.X===clientId) myMark="X";
+      else if(players.O===clientId) myMark="O";
+      else if(!players.X){ myMark="X"; ref.child("players/X").set(clientId); }
+      else if(!players.O){ myMark="O"; ref.child("players/O").set(clientId); }
       else { lobbyMsg("Room is full."); return; }
-      roomCode = code;
-      enterRoom();
-    }).catch(err => lobbyMsg("Error: " + err.message));
+      roomCode=code; enterRoom();
+    }).catch(err=>lobbyMsg("Error: "+err.message));
   }
 
   function enterRoom(){
-    try {
-      const url = new URL(location.href);
-      url.searchParams.set("room", roomCode);
-      window.history.replaceState(null, "", url);
-    } catch(e){}
-    $("lobby").hidden = true;
-    $("game").hidden = false;
-    $("roombar").hidden = false;
-    $("rbCode").textContent = roomCode;
-    $("rbMark").textContent = myMark;
-    $("rbMark").className = "name " + (myMark === "X" ? "x" : "o");
+    try{ const url=new URL(location.href); url.searchParams.set("room",roomCode); window.history.replaceState(null,"",url); }catch(e){}
+    $("lobby").hidden=true; $("game").hidden=false; $("roombar").hidden=false;
+    $("rbCode").textContent=roomCode;
+    $("rbMark").textContent=myMark;
+    $("rbMark").className="name "+(myMark==="X"?"x":"o");
     listenRoom();
   }
 
+  function leaveRoom(){
+    if(roomRef){ roomRef.off(); roomRef=null; }
+    bothJoined=false; myMark=null; roomCode=null;
+    undoReq=null; drawReq=null; gameHist=[]; lastSeq=-1;
+    state=initState();
+    document.body.classList.remove("your-turn");
+    try{ const url=new URL(location.href); url.searchParams.delete("room"); window.history.replaceState(null,"",url); }catch(e){}
+    $("game").hidden=true; $("lobby").hidden=false;
+    $("roombar").hidden=true; $("reqBar").hidden=true;
+    $("winline").classList.remove("show");
+    $("joinCode").value=""; lobbyMsg("");
+  }
+
   function copyLink(){
-    const url = location.href;
-    const done = () => {
-      const b = $("copyLink"); const t = b.textContent;
-      b.textContent = "Copied!"; setTimeout(() => b.textContent = t, 1200);
-    };
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(url).then(done).catch(() => {});
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(location.href).then(()=>{
+        const b=$("copyLink"),t=b.textContent; b.textContent="Copied!"; setTimeout(()=>b.textContent=t,1200);
+      }).catch(()=>{});
     }
   }
 
-  // ============================ BOOT ============================
-  build();
-  state = initState();
-  gameHist = [];
+  // ========================= BOOT =========================
+  build(); state=initState(); gameHist=[];
 
-  $("createBtn").addEventListener("click", createRoom);
-  $("joinBtn").addEventListener("click", () => joinRoom($("joinCode").value));
-  $("joinCode").addEventListener("keydown", e => { if(e.key === "Enter") joinRoom($("joinCode").value); });
-  $("copyLink").addEventListener("click", copyLink);
-  $("undo").addEventListener("click", requestUndo);
-  $("restart").addEventListener("click", restart);
+  $("createBtn").addEventListener("click",createRoom);
+  $("joinBtn").addEventListener("click",()=>joinRoom($("joinCode").value));
+  $("joinCode").addEventListener("keydown",e=>{ if(e.key==="Enter") joinRoom($("joinCode").value); });
+  $("copyLink").addEventListener("click",copyLink);
+  $("leaveBtn").addEventListener("click",leaveRoom);
+  $("undo").addEventListener("click",requestUndo);
+  $("draw").addEventListener("click",proposeDraw);
 
   if(!CONFIG_OK){
-    lobbyMsg("\u26a0\ufe0f Firebase not configured \u2014 edit firebaseConfig at the top of this file.");
-    $("createBtn").disabled = true;
-    $("joinBtn").disabled = true;
+    lobbyMsg("\u26a0\ufe0f Firebase not configured \u2014 edit firebaseConfig in this file.");
+    $("createBtn").disabled=true; $("joinBtn").disabled=true;
   } else {
-    const params = new URLSearchParams(location.search);
-    const r = params.get("room");
-    if(r){ $("joinCode").value = r.toUpperCase(); joinRoom(r); }
+    const r=new URLSearchParams(location.search).get("room");
+    if(r){ $("joinCode").value=r.toUpperCase(); joinRoom(r); }
   }
 })();
 </script>
