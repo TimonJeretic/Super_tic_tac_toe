@@ -103,6 +103,12 @@
   body.your-turn .board.allowed .cell:empty{cursor:pointer}
   body.your-turn .board.allowed .cell:empty:hover{background:radial-gradient(120% 120% at 30% 25%,#34875f,#276a4f)}
   .board.allowed{animation:breathe 1.9s ease-in-out infinite}
+  body.blockmode .board.allowed .cell:empty{background:radial-gradient(120% 120% at 30% 25%,#7d838a,#5c6168)}
+  body.blockmode .board.allowed:hover{filter:none}
+  body.blockmode .board.allowed{animation:none;box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
+    0 0 0 2px rgba(180,185,190,.7),0 0 18px rgba(180,185,190,.4)}
+  .cell[data-mark="B"]{background:radial-gradient(120% 120% at 30% 25%,#6b7280,#454a50)!important;
+    box-shadow:inset 0 2px 3px rgba(0,0,0,.5),inset 0 -1px 1px rgba(255,255,255,.06)}
   @keyframes breathe{
     0%,100%{box-shadow:inset 0 1px 2px rgba(255,255,255,.16),inset 0 -3px 6px rgba(0,0,0,.45),
       0 0 0 2px rgba(243,231,207,.6),0 0 18px rgba(243,231,207,.35)}
@@ -159,6 +165,8 @@
   button.mini{padding:8px 16px;font-size:13px}
   button.mini.ok{background:linear-gradient(180deg,#3f9266,#2a6f4a 55%,#1d5236);
     box-shadow:0 2px 0 #143a26,inset 0 1px 1px rgba(255,255,255,.25)}
+  #blockBtn.active{background:linear-gradient(180deg,#8a8f96,#5b6066 55%,#3a3e44);
+    box-shadow:0 2px 0 #23262a,inset 0 1px 1px rgba(255,255,255,.25)}
 
   /* lobby */
   .screen{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:1}
@@ -187,6 +195,8 @@
     <div class="or">or</div>
     <input id="joinCode" placeholder="CODE" maxlength="5" autocomplete="off" spellcheck="false" autocapitalize="characters">
     <button id="joinBtn">Join room</button>
+    <div class="or">or</div>
+    <button id="localBtn">Play local</button>
     <div class="msg" id="lobbyMsg"></div>
   </div>
 </div>
@@ -212,6 +222,14 @@
           <span class="s-o" id="seriesO">0</span>
         </div>
       </div>
+      <div class="series-badge" id="blocksBadge">
+        <span class="s-label">Blocks</span>
+        <div class="s-row">
+          <span class="s-x" id="blocksX">3</span>
+          <span class="s-sep">–</span>
+          <span class="s-o" id="blocksO">3</span>
+        </div>
+      </div>
     </div>
     <div class="status" id="status"></div>
     <div class="roombar" id="roombar" hidden>
@@ -219,6 +237,10 @@
       <span>You: <b id="rbMark" class="name">?</b></span>
       <button class="mini" id="copyLink">Copy link</button>
       <button class="mini leave-btn" id="leaveBtn">Leave room</button>
+    </div>
+    <div class="roombar" id="localbar" hidden>
+      <span>Local game — pass the device each turn</span>
+      <button class="mini leave-btn" id="leaveLocalBtn">Back to menu</button>
     </div>
   </header>
 
@@ -237,6 +259,7 @@
   <div class="controls">
     <button id="undo">Undo</button>
     <button id="draw">Propose draw</button>
+    <button id="blockBtn">Block (3)</button>
   </div>
 </div>
 
@@ -281,6 +304,7 @@
   let state, gameHist = [], boardEls, cellEls, overlayEls;
   let myMark = null, roomCode = null, roomRef = null;
   let bothJoined = false, undoReq = null, drawReq = null, lastSeq = -1;
+  let localMode = false, blockMode = false;
   const clientId = getClientId();
 
   function getClientId(){
@@ -293,13 +317,15 @@
   // ========================= GAME LOGIC =========================
   function initState(){
     return { boards:Array.from({length:9},()=>Array(9).fill(null)), winners:Array(9).fill(null),
-      current:"X", active:null, over:false, winner:null, winType:null, winBoards:[], seq:0, cleared:-1 };
+      current:"X", active:null, over:false, winner:null, winType:null, winBoards:[], seq:0, cleared:-1,
+      blocks:{X:3,O:3} };
   }
 
   function clone(s){
     return { boards:s.boards.map(b=>b.slice()), winners:s.winners.slice(),
       current:s.current, active:s.active, over:s.over, winner:s.winner,
-      winType:s.winType, winBoards:s.winBoards.slice(), seq:s.seq, cleared:s.cleared };
+      winType:s.winType, winBoards:s.winBoards.slice(), seq:s.seq, cleared:s.cleared,
+      blocks:{X:(s.blocks&&s.blocks.X)||0, O:(s.blocks&&s.blocks.O)||0} };
   }
 
   function markSVG(p,cls){
@@ -308,18 +334,26 @@
   }
 
   function winnerOf(cells){
-    for(const [a,b,c] of LINES){ if(cells[a]&&cells[a]===cells[b]&&cells[b]===cells[c]) return {p:cells[a]}; }
+    for(const [a,b,c] of LINES){ if(cells[a]&&cells[a]!=="B"&&cells[a]===cells[b]&&cells[b]===cells[c]) return {p:cells[a]}; }
     return null;
   }
 
   function isAllowed(s,b){ if(s.over||s.winners[b]!==null) return false; return s.active===null||s.active===b; }
+  function isBlockAllowed(s,b){ return !s.over && s.winners[b]===null; }
+  function unclaimedCount(s){ return s.winners.filter(w=>w===null).length; }
 
   function applyMove(s,hist,b,c){
     const ns=clone(s), nh=hist.slice(); nh.push(clone(s));
     const player=ns.current; ns.boards[b][c]=player; ns.cleared=-1;
     const w=winnerOf(ns.boards[b]);
     if(w){ ns.winners[b]=player; }
-    else if(ns.boards[b].every(x=>x!==null)){ ns.boards[b]=Array(9).fill(null); ns.cleared=b; }
+    else if(ns.boards[b].every(x=>x!==null)){
+      if(unclaimedCount(ns)===1){
+        ns.over=true; ns.winner=null; ns.winType="draw"; ns.winBoards=[]; ns.active=null;
+        ns.seq=(s.seq||0)+1; return {state:ns,history:nh};
+      }
+      ns.boards[b]=Array(9).fill(null); ns.cleared=b;
+    }
     ns.active = ns.winners[c]!==null ? null : c;
     const my=[]; for(let i=0;i<9;i++) if(ns.winners[i]===player) my.push(i);
     let won=null;
@@ -327,6 +361,23 @@
     if(!won&&my.length>=5) won={type:"majority",boards:my};
     if(won){ ns.over=true;ns.winner=player;ns.winType=won.type;ns.winBoards=won.boards; }
     else { ns.current=player==="X"?"O":"X"; }
+    ns.seq=(s.seq||0)+1;
+    return {state:ns,history:nh};
+  }
+
+  function applyBlock(s,hist,b,c,player){
+    const ns=clone(s), nh=hist.slice(); nh.push(clone(s));
+    ns.boards[b][c]="B"; ns.cleared=-1;
+    ns.blocks[player]=Math.max(0,(ns.blocks[player]||0)-1);
+    if(ns.boards[b].every(x=>x!==null)){
+      if(unclaimedCount(ns)===1){
+        ns.over=true; ns.winner=null; ns.winType="draw"; ns.winBoards=[]; ns.active=null;
+        ns.seq=(s.seq||0)+1; return {state:ns,history:nh};
+      }
+      ns.boards[b]=Array(9).fill(null); ns.cleared=b;
+    }
+    ns.active=null;
+    ns.current=player==="X"?"O":"X";
     ns.seq=(s.seq||0)+1;
     return {state:ns,history:nh};
   }
@@ -353,12 +404,28 @@
 
   function onClick(e){
     const cell=e.target.closest(".cell"); if(!cell) return;
-    if(!CONFIG_OK||!bothJoined||state.over) return;
-    if(myMark!==state.current) return;
+    if(localMode){ if(state.over) return; }
+    else { if(!CONFIG_OK||!bothJoined||state.over) return; if(myMark!==state.current) return; }
     const b=+cell.dataset.b,c=+cell.dataset.c;
+    if(blockMode){
+      if(state.blocks[state.current]<=0||!isBlockAllowed(state,b)||state.boards[b][c]!==null) return;
+      const res=applyBlock(state,gameHist,b,c,state.current);
+      blockMode=false; document.body.classList.remove("blockmode");
+      applyResult(res);
+      return;
+    }
     if(!isAllowed(state,b)||state.boards[b][c]!==null) return;
     const res=applyMove(state,gameHist,b,c);
-    pushGame(res.state,res.history,true,true);   // clearUndo + clearDraw
+    applyResult(res);
+  }
+
+  function applyResult(res){
+    if(localMode){
+      state=res.state; gameHist=res.history;
+      render(); updateTurnUI(); updateButtons();
+    } else {
+      pushGame(res.state,res.history,true,true);   // clearUndo + clearDraw
+    }
   }
 
   function flash(b){ const el=boardEls[b]; el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
@@ -369,17 +436,19 @@
     for(let b=0;b<9;b++){
       const bEl=boardEls[b],wn=state.winners[b];
       bEl.classList.toggle("won",wn!==null);
-      bEl.classList.toggle("allowed",bothJoined&&isAllowed(state,b));
+      const allowed = blockMode ? isBlockAllowed(state,b) : isAllowed(state,b);
+      bEl.classList.toggle("allowed",bothJoined&&!state.over&&allowed);
       bEl.classList.toggle("winhi",state.over&&winSet.has(b));
       const ov=overlayEls[b],want=wn?wn:"";
       if(ov.dataset.mark!==want){ ov.dataset.mark=want; ov.innerHTML=wn?markSVG(wn,"big"):""; }
       for(let c=0;c<9;c++){
         const cEl=cellEls[b][c],m=state.boards[b][c]||"";
-        if(cEl.dataset.mark!==m){ cEl.dataset.mark=m; cEl.innerHTML=m?markSVG(m,"mark pop"):""; }
+        if(cEl.dataset.mark!==m){ cEl.dataset.mark=m; cEl.innerHTML=(m&&m!=="B")?markSVG(m,"mark pop"):""; }
       }
     }
     const sx=state.winners.filter(w=>w==="X").length, so=state.winners.filter(w=>w==="O").length;
     $("scoreX").textContent=sx; $("scoreO").textContent=so;
+    $("blocksX").textContent=state.blocks.X; $("blocksO").textContent=state.blocks.O;
     const chipX=$("chipX"),chipO=$("chipO"),status=$("status");
     chipX.classList.toggle("on",bothJoined&&!state.over&&state.current==="X");
     chipO.classList.toggle("on",bothJoined&&!state.over&&state.current==="O");
@@ -388,14 +457,18 @@
       status.innerHTML='<span class="hint">Waiting for opponent\u2026</span>';
     } else if(state.over){
       status.classList.add("win");
-      const cls=state.winner==="X"?"x":"o";
-      status.innerHTML='Player <span class="name '+cls+'">'+state.winner+'</span> wins'
-        +'<span class="hint">\u00b7 '+(state.winner===myMark?"you win":"you lose")+'</span>';
+      if(state.winner){
+        const cls=state.winner==="X"?"x":"o";
+        status.innerHTML='Player <span class="name '+cls+'">'+state.winner+'</span> wins'
+          +(localMode?"":'<span class="hint">\u00b7 '+(state.winner===myMark?"you win":"you lose")+'</span>');
+      } else {
+        status.innerHTML='Draw \u2014 no winner';
+      }
     } else {
       status.classList.remove("win");
-      const cls=state.current==="X"?"x":"o", mine=state.current===myMark;
-      let html='<span class="name '+cls+'">'+state.current+'</span>\u2009to move'
-        +'<span class="hint">\u00b7 '+(mine?"your turn":"opponent")+'</span>';
+      const cls=state.current==="X"?"x":"o", mine=localMode||state.current===myMark;
+      let html='<span class="name '+cls+'">'+state.current+'</span>\u2009to move';
+      if(!localMode) html+='<span class="hint">\u00b7 '+(mine?"your turn":"opponent")+'</span>';
       if(state.active===null) html+='<span class="hint">\u00b7 play anywhere</span>';
       status.innerHTML=html;
     }
@@ -417,13 +490,28 @@
     }
   }
 
-  function updateTurnUI(){ document.body.classList.toggle("your-turn",bothJoined&&!state.over&&state.current===myMark); }
+  function updateTurnUI(){ document.body.classList.toggle("your-turn",bothJoined&&!state.over&&(localMode||state.current===myMark)); }
 
   function updateButtons(){
     const anyReq=!!(undoReq||drawReq);
     $("undo").disabled=!bothJoined||gameHist.length===0||anyReq;
     $("draw").disabled=!bothJoined||anyReq;
     $("draw").textContent=state.over?"New game":"Propose draw";
+    const turnOk = localMode||myMark===state.current;
+    const remaining = state.blocks?state.blocks[state.current]:0;
+    const blockBtn=$("blockBtn");
+    blockBtn.disabled=!bothJoined||state.over||!turnOk||remaining<=0||anyReq;
+    blockBtn.textContent="Block ("+remaining+")";
+    if(blockBtn.disabled&&blockMode){ blockMode=false; document.body.classList.remove("blockmode"); }
+    blockBtn.classList.toggle("active",blockMode);
+  }
+
+  function toggleBlockMode(){
+    if($("blockBtn").disabled) return;
+    blockMode=!blockMode;
+    document.body.classList.toggle("blockmode",blockMode);
+    $("blockBtn").classList.toggle("active",blockMode);
+    render();
   }
 
   function updateSeriesUI(series){
@@ -452,6 +540,7 @@
         try{ const g=JSON.parse(data.game); state=g.state; gameHist=g.history||[]; }
         catch(e){ console.error("parse error",e); }
       }
+      if(state&&!state.blocks) state.blocks={X:3,O:3};
       if(state&&state.seq>lastSeq&&state.cleared>=0) flash(state.cleared);
       if(state) lastSeq=state.seq;
       updateSeriesUI(data.series||null);
@@ -484,6 +573,11 @@
 
   function requestUndo(){
     if(!bothJoined||gameHist.length===0||undoReq||drawReq) return;
+    if(localMode){
+      state=gameHist[gameHist.length-1]; gameHist=gameHist.slice(0,-1);
+      render(); updateTurnUI(); updateButtons();
+      return;
+    }
     db.ref("rooms/"+roomCode+"/undoReq").set({by:myMark,ts:Date.now()});
   }
 
@@ -498,6 +592,13 @@
 
   function proposeDraw(){
     if(!bothJoined||undoReq||drawReq) return;
+    if(localMode){
+      state=initState(); gameHist=[]; lastSeq=-1; blockMode=false;
+      document.body.classList.remove("blockmode");
+      $("winline").classList.remove("show");
+      render(); updateTurnUI(); updateButtons();
+      return;
+    }
     if(state.over){ approveDraw(); return; }
     db.ref("rooms/"+roomCode+"/drawReq").set({by:myMark,ts:Date.now()});
   }
@@ -549,7 +650,7 @@
 
   function enterRoom(){
     try{ const url=new URL(location.href); url.searchParams.set("room",roomCode); window.history.replaceState(null,"",url); }catch(e){}
-    $("lobby").hidden=true; $("game").hidden=false; $("roombar").hidden=false;
+    $("lobby").hidden=true; $("game").hidden=false; $("roombar").hidden=false; $("localbar").hidden=true;
     $("rbCode").textContent=roomCode;
     $("rbMark").textContent=myMark;
     $("rbMark").className="name "+(myMark==="X"?"x":"o");
@@ -558,15 +659,27 @@
 
   function leaveRoom(){
     if(roomRef){ roomRef.off(); roomRef=null; }
-    bothJoined=false; myMark=null; roomCode=null;
+    bothJoined=false; myMark=null; roomCode=null; localMode=false; blockMode=false;
     undoReq=null; drawReq=null; gameHist=[]; lastSeq=-1;
     state=initState();
-    document.body.classList.remove("your-turn");
+    document.body.classList.remove("your-turn","blockmode");
     try{ const url=new URL(location.href); url.searchParams.delete("room"); window.history.replaceState(null,"",url); }catch(e){}
     $("game").hidden=true; $("lobby").hidden=false;
-    $("roombar").hidden=true; $("reqBar").hidden=true;
+    $("roombar").hidden=true; $("localbar").hidden=true; $("reqBar").hidden=true;
     $("winline").classList.remove("show");
     $("joinCode").value=""; lobbyMsg("");
+  }
+
+  function playLocal(){
+    localMode=true; myMark=null; roomCode=null; bothJoined=true; blockMode=false;
+    undoReq=null; drawReq=null; lastSeq=-1;
+    state=initState(); gameHist=[];
+    $("lobby").hidden=true; $("game").hidden=false;
+    $("roombar").hidden=true; $("localbar").hidden=false; $("reqBar").hidden=true;
+    document.body.classList.remove("blockmode");
+    $("winline").classList.remove("show");
+    updateSeriesUI(null);
+    render(); updateTurnUI(); updateButtons();
   }
 
   function copyLink(){
@@ -587,6 +700,9 @@
   $("leaveBtn").addEventListener("click",leaveRoom);
   $("undo").addEventListener("click",requestUndo);
   $("draw").addEventListener("click",proposeDraw);
+  $("blockBtn").addEventListener("click",toggleBlockMode);
+  $("localBtn").addEventListener("click",playLocal);
+  $("leaveLocalBtn").addEventListener("click",leaveRoom);
 
   if(!CONFIG_OK){
     lobbyMsg("\u26a0\ufe0f Firebase not configured \u2014 edit firebaseConfig in this file.");
